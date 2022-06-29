@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 })
 connectDB()
 app.use("/admin", require("./routes/authRoutes"))
-app.use("/", require("./routes/eventRoutes"))
+app.use("/event", require("./routes/eventRoutes"))
 const PORT = process.env.PORT
 
 app.listen(PORT, () => {
