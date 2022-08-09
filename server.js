@@ -7,10 +7,13 @@ require('dotenv').config()
 
 app.use(cors())
 app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+app.use(express.static(__dirname, 'public'))
 app.use(bodyParser.json())
 app.get('/', (req, res) => {
     res.send('Hello World')
 })
+
 connectDB()
 app.use("/admin", require("./routes/authRoutes"))
 app.use("/event", require("./routes/eventRoutes"))

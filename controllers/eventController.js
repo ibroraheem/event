@@ -1,79 +1,112 @@
 const Event = require('../models/event')
+const Ticket = require('../models/ticket')
 const QRCode = require('qrcode');
+const multer = require('multer');
+const jwt = require('jsonwebtoken');
+const multer = require('multer')
+const upload = multer({ dest: '../uploads/' })
+upload.single('image')
+
+
 
 const bookEvent = async (req, res) => {
-    const {eventId, name, phone, email} = req.body
+    const { eventId, buyerEmail, buyerName, buyerPhone } = req.body
     try {
         const event = await Event.findById(eventId)
-        if(!event) {
-            return res.status(400).send({message: 'Event not found'})
+        if (!event) {
+            return res.status(400).send({ message: 'Event not found' })
         }
-        const qrCode = await QRCode.toDataURL(`${name} ${phone} ${event.name} ${event.date} ${event.location} ${event.price}`)
-        const newBooking = {
-        qrCode
-        }
-        await Event.findByIdAndUpdate(eventId, {$push: {bookings: newBooking}})
-        res.status(200).send({message: 'Booking successful'})
+        const ticket = new Ticket({
+            eventId,
+            buyerEmail,
+            buyerName,
+            buyerPhone
+        }).then(() => {
+            QRCode.toDataURL(ticket._id, function (err, url) {
+                if (err) throw err
+                ticket.qrCode = url
+                ticket.save()
+                res.status(201).send({ url, message: 'Ticket booked' })
+            })
+
+            //Mailer CODE goes here
+
+        })
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
 const postEvent = (req, res) => {
-    const {name, date, description, location, price, image} = req.body
-    const event = new Event({
-        name,
-        date,
-        description,
-        location,
-        price,
-        image
-    })
-    event.save()
-    res.status(201).send({message: 'Event created'})
+    const token = req.body.token || req.headers['x-access-token'] || req.query.token
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res.status(401).send({ message: 'Unauthorized' })
+            } else {
+                const { name, description, date, location, price } = req.body
+                const image = req.file.filename
+                const newEvent = new Event({
+                    name,
+                    description,
+                    date,
+                    location,
+                    price,
+                    image,
+                    createdBy: decoded.id
+                })
+                newEvent.save((err, event) => {
+                    if (err) {
+                        return res.status(400).send({ message: err.message })
+                    }
+                    return res.status(201).send({ message: 'Event created successfully' })
+                })
+            }
+        })
+    }
 }
 const getEvents = async (req, res) => {
     try {
         const events = await Event.find({})
         res.status(200).send(events)
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
 const getEvent = async (req, res) => {
-    const {eventId} = req.params
+    const { eventId } = req.params
     try {
         const event = await Event.findById(eventId)
-        if(!event) {
-            return res.status(400).send({message: 'Event not found'})
+        if (!event) {
+            return res.status(400).send({ message: 'Event not found' })
         }
         res.status(200).send(event)
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
 const deleteEvent = async (req, res) => {
-    const {eventId} = req.params
+    const { eventId } = req.params
     try {
         const event = await Event.findByIdAndDelete(eventId)
-        if(!event) {
-            return res.status(400).send({message: 'Event not found'})
+        if (!event) {
+            return res.status(400).send({ message: 'Event not found' })
         }
-        res.status(200).send({message: 'Event deleted'})
+        res.status(200).send({ message: 'Event deleted' })
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
 const updateEvent = async (req, res) => {
-    const {eventId} = req.params
-    const {name, date, description, location, price, image} = req.body
+    const { eventId } = req.params
+    const { name, date, description, location, price, image } = req.body
     try {
-        const event = await Event.findByIdAndUpdate(eventId, {name, date, description, location, price, image})
-        if(!event) {
-            return res.status(400).send({message: 'Event not found'})
+        const event = await Event.findByIdAndUpdate(eventId, { name, date, description, location, price, image })
+        if (!event) {
+            return res.status(400).send({ message: 'Event not found' })
         }
-        res.status(200).send({message: 'Event updated'})
+        res.status(200).send({ message: 'Event updated' })
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
-module.exports = {bookEvent, postEvent, getEvents, getEvent, deleteEvent, updateEvent}
+module.exports = { bookEvent, postEvent, getEvents, getEvent, deleteEvent, updateEvent }

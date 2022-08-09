@@ -5,6 +5,11 @@ const EventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     date:{
         type: Date,
         required: true
@@ -14,6 +19,10 @@ const EventSchema = new mongoose.Schema({
         required: true
     },
     location:{
+        type: String,
+        required: true
+    },
+    venue:{
         type: String,
         required: true
     },

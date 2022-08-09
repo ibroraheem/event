@@ -16,8 +16,13 @@ const register = async (req, res) =>{
             email,
             password: hashedPassword
         })
-        const savedUser = await newUser.save()
-        res.status(201).send({message: 'User created successfully'})
+        await newUser.save()
+        const payload = {id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role}
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+            expiresIn: '1h'
+        })
+
+        res.status(201).send({token, message: 'User created successfully'})
     } catch (error) {
         res.status(400).send({message: error.message})
     }
