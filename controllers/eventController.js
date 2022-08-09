@@ -58,7 +58,7 @@ const postEvent = (req, res) => {
                     if (err) {
                         return res.status(400).send({ message: err.message })
                     }
-                    return res.status(201).send({ message: 'Event created successfully' })
+                    return res.status(201).send({ event, message: 'Event created successfully' })
                 })
             }
         })
@@ -85,28 +85,63 @@ const getEvent = async (req, res) => {
     }
 }
 const deleteEvent = async (req, res) => {
-    const { eventId } = req.params
-    try {
-        const event = await Event.findByIdAndDelete(eventId)
-        if (!event) {
-            return res.status(400).send({ message: 'Event not found' })
-        }
-        res.status(200).send({ message: 'Event deleted' })
-    } catch (error) {
-        res.status(400).send({ message: error.message })
+    const token = req.body.token || req.headers['x-access-token'] || req.query.token
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res.status(401).send({ message: 'Unauthorized' })
+            } else {
+                const { eventId } = req.params
+                try {
+                    const event = Event.findById(eventId)
+                    if (!event) {
+                        return res.status(400).send({ message: 'Event not found' })
+                    }
+                    if (event.createdBy !== decoded.id) {
+                        return res.status(401).send({ message: 'Unauthorized' })
+                    } else {
+                        Event.findByIdAndDelete(eventId)
+                        res.status(200).send({ message: 'Event deleted successfully' })
+                    }
+                } catch (error) {
+                    res.status(400).send({ message: error.message })
+                }
+            }
+        })
     }
 }
+
 const updateEvent = async (req, res) => {
-    const { eventId } = req.params
-    const { name, date, description, location, price, image } = req.body
-    try {
-        const event = await Event.findByIdAndUpdate(eventId, { name, date, description, location, price, image })
-        if (!event) {
-            return res.status(400).send({ message: 'Event not found' })
-        }
-        res.status(200).send({ message: 'Event updated' })
-    } catch (error) {
-        res.status(400).send({ message: error.message })
+    const token = req.body.token || req.headers['x-access-token'] || req.query.token
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res.status(401).send({ message: 'Unauthorized' })
+            } else {
+                const { eventId } = req.params
+                const { name, description, date, location, price } = req.body
+                try {
+                    const event = Event.findById(eventId)
+                    if (!event) {
+                        return res.status(400).send({ message: 'Event not found' })
+                    }
+                    if (event.createdBy !== decoded.id) {
+                        return res.status(401).send({ message: 'Unauthorized' })
+                    } else {
+                        Event.findByIdAndUpdate(eventId, {
+                            name,
+                            description,
+                            date,
+                            location,
+                            price
+                        })
+                        res.status(200).send({ message: 'Event updated successfully' })
+                    }
+                } catch (error) {
+                    res.status(400).send({ message: error.message })
+                }
+            }
+        })
     }
 }
 module.exports = { bookEvent, postEvent, getEvents, getEvent, deleteEvent, updateEvent }
