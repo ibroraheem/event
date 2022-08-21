@@ -6,15 +6,15 @@ const TicketSchema = new mongoose.Schema({
         ref: 'Event',
         required: true
     },
-    buyerEmail:{
+    buyerEmail: {
         type: String,
         required: true
     },
-    buyerName:{
+    buyerName: {
         type: String,
         required: true
     },
-    buyerPhone:{
+    buyerPhone: {
         type: String,
         required: true
     },
@@ -22,14 +22,18 @@ const TicketSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    qrCode: { type: String,
+    qrCode: {
+        type: String,
         default: ''
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
-})
+    numberOfTickets: {
+        type: Number,
+        required: true
+    },
+
+},
+    { timestamps: true }
+)
 
 const Ticket = mongoose.model('Ticket', TicketSchema)
 module.exports = Ticket

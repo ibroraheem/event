@@ -20,9 +20,10 @@ const bookEvent = async (req, res) => {
             eventId,
             buyerEmail,
             buyerName,
-            buyerPhone
+            buyerPhone,
+            numberOfTickets
         }).then(() => {
-            QRCode.toDataURL(ticket._id, function (err, url) {
+            QRCode.toDataURL(`${ticket._id} \n Number of tickets: ${numberOfTickets}`, function (err, url) {
                 if (err) throw err
                 ticket.qrCode = url
                 ticket.save()
@@ -37,31 +38,35 @@ const bookEvent = async (req, res) => {
     }
 }
 const postEvent = (req, res) => {
-    const token = req.body.token || req.headers['x-access-token'] || req.query.token
-    if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                return res.status(401).send({ message: 'Unauthorized' })
-            } else {
-                const { name, description, date, location, price } = req.body
-                const image = req.file.filename
-                const newEvent = new Event({
-                    name,
-                    description,
-                    date,
-                    location,
-                    price,
-                    image,
-                    createdBy: decoded.id
-                })
-                newEvent.save((err, event) => {
-                    if (err) {
-                        return res.status(400).send({ message: err.message })
-                    }
-                    return res.status(201).send({ event, message: 'Event created successfully' })
-                })
-            }
-        })
+    try {
+        const token = req.headers.authorization.split(' ')[1]
+        if (token) {
+            jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+                if (err) {
+                    return res.status(401).send({ message: 'Unauthorized' })
+                } else {
+                    const { name, description, date, location, price } = req.body
+                    const image = req.file.filename
+                    const newEvent = new Event({
+                        name,
+                        description,
+                        date,
+                        location,
+                        price,
+                        image,
+                        createdBy: decoded.id
+                    })
+                    newEvent.save((err, event) => {
+                        if (err) {
+                            return res.status(400).send({ message: err.message })
+                        }
+                        return res.status(201).send({ event, message: 'Event created successfully' })
+                    })
+                }
+            })
+        }
+    } catch (error) {
+        res.status(400).send({ message: error.message })
     }
 }
 const getEvents = async (req, res) => {
@@ -85,7 +90,7 @@ const getEvent = async (req, res) => {
     }
 }
 const deleteEvent = async (req, res) => {
-    const token = req.body.token || req.headers['x-access-token'] || req.query.token
+    const token = req.headers.authorization.split(' ')[1]
     if (token) {
         jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
             if (err) {

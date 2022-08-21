@@ -3,57 +3,68 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 require('dotenv').config()
 
-const register = async (req, res) =>{
-    const {name, email, password} = req.body
-    try {
-        const user = await User.findOne({email})
-        if(user) {
-            return res.status(400).send({message: 'User already exists'})
+const register = async (req, res) => {
+    const isFirstAccount = countDocuments() === 0
+    if (isFirstAccount) {
+        const { username, email, password } = req.body
+        try {
+            const user = await User.findOne({ email })
+            if (user.email === email) {
+                return res.status(400).send({ message: 'Email already exists' })
+            } else if (user.username === username) {
+                return res.status(400).send({ message: 'Username already exists' })
+            } else {
+                const user = new User({
+                    username,
+                    email,
+                    password
+                })
+                const salt = await bcrypt.genSalt(10)
+                user.password = await bcrypt.hash(password, salt)
+                await user.save()
+                const payload = {
+                    user: {
+                        id: user.id,
+
+                        role: user.role
+                    }
+                }
+                jwt.sign(payload, process.env.SECRET_KEY, (err, token) => {
+                    if (err) throw err
+                    res.json({ token })
+                })
+            }
+        } catch (error) {
+            console.log(error)
         }
-        const hashedPassword = await bcrypt.hash(password, 12)
-        const newUser = new User({
-            name,
-            email,
-            password: hashedPassword
-        })
-        await newUser.save()
-        const payload = {id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role}
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: '1h'
-        })
-
-        res.status(201).send({token, message: 'User created successfully'})
-    } catch (error) {
-        res.status(400).send({message: error.message})
+    } else {
+        res.status(400).json({ msg: 'There is already an account' })
     }
-
 }
 
 const login = async (req, res) => {
-    const {email, password} = req.body
+    const { email, password } = req.body
     try {
-        const user = await User.findOne({email})
-        if(!user) {
-            return res.status(400).send({message: 'User not found'})
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.status(400).send({ message: 'User not found' })
         }
         const isMatch = await bcrypt.compare(password, user.password)
-        if(!isMatch) {
-            return res.status(400).send({message: 'Invalid password'})
+        if (!isMatch) {
+            return res.status(400).send({ message: 'Invalid password' })
         }
         const payload = {
             id: user._id,
-            name: user.name,
-            email: user.email,
             role: user.role
         }
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
             expiresIn: '1h'
         })
-        res.status(200).send({token})
+        res.status(200).send({ token })
     } catch (error) {
-        res.status(400).send({message: error.message})
+        res.status(400).send({ message: error.message })
     }
 }
 
-module.exports = {register, login}
+module.exports = { register, login }
 
