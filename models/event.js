@@ -1,5 +1,7 @@
+/* Importing the mongoose module. */
 const mongoose = require('mongoose');
 
+/* Creating a schema for the event model. */
 const EventSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -27,25 +29,17 @@ const EventSchema = new mongoose.Schema({
         required: true
     },
     price: {
-        type: String,
+        type: Array,
         required: true
     },
     image: {
         type: String,
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    }
 },
     { timestamps: true }
 )
 
+/* Exporting the model to be used in other files. */
 const Event = mongoose.model('Event', EventSchema)
 module.exports = Event

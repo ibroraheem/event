@@ -1,5 +1,7 @@
+/* Importing the mongoose library. */
 const mongoose = require('mongoose');
 
+/* Creating a schema for the ticket model. */
 const TicketSchema = new mongoose.Schema({
     eventId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -30,10 +32,16 @@ const TicketSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    price: {
+        type: Number,
+        required: true
+    }
 
 },
     { timestamps: true }
 )
 
+/* Creating a model for the Ticket schema. */
 const Ticket = mongoose.model('Ticket', TicketSchema)
+/* Exporting the Ticket model. */
 module.exports = Ticket

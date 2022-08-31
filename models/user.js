@@ -1,5 +1,7 @@
+/* Importing the mongoose library. */
 const mongoose = require('mongoose')
 
+/* Creating a schema for the User model. */
 const UserSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -22,6 +24,7 @@ const UserSchema = new mongoose.Schema({
     { timestamps: true }
 )
 
+/* Exporting the User model to be used in other files. */
 const User = new mongoose.model('User', UserSchema)
 
 module.exports = User
