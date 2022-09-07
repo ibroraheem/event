@@ -2,6 +2,7 @@
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const nodemailer = require('nodemailer')
 require('dotenv').config()
 
 /**
@@ -19,7 +20,9 @@ const register = async (req, res) => {
                 email,
                 username,
                 password,
-                role: 'admin'
+                role: 'admin',
+                confirmationCode: '',
+                confirmed: true
             })
             await user.save()
             res.status(201).send({ message: 'Admin user created' })
@@ -28,14 +31,18 @@ const register = async (req, res) => {
         if (user) {
             res.status(400).send({ message: 'User already exists' })
         }
+        const confirmationCode = jwt.sign({email, username}, process.env.JWT_SECRET, {expiresIn: '1h'})
         const newUser = new User({
             email,
             username,
             password,
-            role: 'organizer'
+            role: 'organizer',
+            confirmationCode: confirmationCode,
         })
         await newUser.save()
         res.status(201).send({ message: 'User created' })
+        //Mailer Code
+
     } catch (error) {
         res.status(400).send({ message: error.message })
     }
@@ -75,5 +82,21 @@ const register = async (req, res) => {
             }
         }
 
-        module.exports = { register, login }
+        const confirmUser = async (req, res) => {
+            const { confirmationCode } = req.params
+            try {
+                const user = await User.findOne({ confirmationCode })
+                if (!user) {
+                    return res.status(400).send({ message: 'User not found' })
+                }
+                user.confirmed = true
+                user.confirmationCode = ''
+                await user.save()
+                res.status(200).send({ message: 'User confirmed' })
+            } catch (error) {
+                res.status(400).send({ message: error.message })
+            }
+        }
+
+        module.exports = { register, login, confirmUser }
 

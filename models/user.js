@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 
 /* Creating a schema for the User model. */
 const UserSchema = new mongoose.Schema({
-    name: {
+    username: {
         type: String,
         required: true
     },
@@ -15,11 +15,23 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    phone: {
+        type: String,
+        required: true
+    },
     role: {
         type: String,
         enum: ['admin', 'organizer'],
         default: 'organizer'
-    }
+    },
+    confirmationCode: {
+        type: String,
+        required: true
+    },
+    confirmed: {
+        type: Boolean,
+        default: false
+    },
 },
     { timestamps: true }
 )

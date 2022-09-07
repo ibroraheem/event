@@ -2,6 +2,7 @@
 const Event = require('../models/event')
 const Ticket = require('../models/ticket')
 const QRCode = require('qrcode');
+const QrScanner = require('qr-scanner');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const multer = require('multer')
@@ -63,15 +64,17 @@ const postEvent = (req, res) => {
                     return res.status(401).send({ message: 'Unauthorized' })
                 } else {
                     if (decoded.role === 'admin' || decoded.role === 'organizer') {
-                        const { name, description, date, location, price } = req.body
+                        const { name, date, description, venue, location, ticketTypes, price, totalTickets } = req.body
                         const image = req.file.filename
                         const newEvent = new Event({
                             name,
-                            description,
                             date,
+                            description,
+                            venue,
                             location,
-                            numberOfTickets,
+                            ticketTypes,
                             price,
+                            totalTickets,
                             image,
                             createdBy: decoded.id
                         })

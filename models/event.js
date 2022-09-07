@@ -7,7 +7,7 @@ const EventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    userId: {
+    createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
@@ -28,13 +28,25 @@ const EventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    ticketTypes: {
+        type: Array,
+        required: true
+    },
     price: {
+        type: Array,
+        required: true
+    },
+    totalTickets: {
         type: Array,
         required: true
     },
     image: {
         type: String,
         required: true
+    },
+    attendees: {
+        type: Array,
+        default: []
     },
 },
     { timestamps: true }
