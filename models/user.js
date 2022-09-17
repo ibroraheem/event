@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema({
     },
     confirmationCode: {
         type: String,
-        required: true
+        default: ''
     },
     confirmed: {
         type: Boolean,

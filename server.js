@@ -10,7 +10,6 @@ require('dotenv').config()
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(express.static(__dirname, 'public'))
 app.use(bodyParser.json())
 
 /* This is a route that is used to test if the server is running. */
@@ -22,7 +21,7 @@ connectDB()
 /* Telling the server to use the routes in the authRoutes file. */
 app.use("/", require("./routes/authRoutes"))
 /* Telling the server to use the routes in the eventRoutes file. */
-app.use("/event", require("./routes/eventRoutes"))
+// app.use("/event", require("./routes/eventRoutes"))
 
 /* Setting the port that the server will run on. */
 const PORT = process.env.PORT

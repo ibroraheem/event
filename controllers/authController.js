@@ -12,17 +12,21 @@ require('dotenv').config()
  * @param res - the response object
  */
 const register = async (req, res) => {
-    const { email, username, password } = req.body
+    const { email, username, password, phone } = req.body
     try {
         const isFirstUser = await User.countDocuments() === 0
+        const role = isFirstUser ? 'admin' : 'organizer'
+        const confirmed = isFirstUser ? true : false
+        const hash = await bcrypt.hash(password, 10)
         if (isFirstUser) {
             const user = new User({
                 email,
                 username,
-                password,
-                role: 'admin',
+                password: hash,
+                role,
                 confirmationCode: '',
-                confirmed: true
+                phone,
+                confirmed
             })
             await user.save()
             res.status(201).send({ message: 'Admin user created' })
@@ -35,8 +39,9 @@ const register = async (req, res) => {
         const newUser = new User({
             email,
             username,
-            password,
+            password: hash,
             role: 'organizer',
+            phone,
             confirmationCode: confirmationCode,
         })
         await newUser.save()
@@ -52,8 +57,8 @@ const register = async (req, res) => {
 
 /**
  * It takes the email and password from the request body, finds the user in the database, compares the
- * password to the hashed password in the database, and if they match, it creates a token and sends it
- * back to the user.
+ * password to the hashed password in the database, and if they match, it signs a token with the user's
+ * id and sends it back to the client.
  * @param req - The request object.
  * @param res - The response object.
  * @returns The token is being returned.
@@ -63,24 +68,19 @@ const login = async (req, res) => {
     try {
         const user = await User.findOne({ email })
         if (!user) {
-            return res.status(400).send({ message: 'User not found' })
+            return res.status(404).send({ message: 'User not found' })
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) {
-            return res.status(400).send({ message: 'Invalid password' })
+            return res.status(400).send({ message: 'Invalid credentials' })
         }
-        const payload = {
-            id: user._id,
-            role: user.role
-        }
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: '1h'
-        })
-        res.status(200).send({ token })
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+        res.status(200).json({ message: 'Logged in Successfully', token })
     } catch (error) {
         res.status(400).send({ message: error.message })
     }
 }
+
 
 /**
  * It takes a confirmation code from the URL, finds the user with that code, sets the user's confirmed
@@ -171,6 +171,31 @@ const resetPassword = async (req, res) => {
     }
 }
 
+/**
+ * It takes the token from the request header, decodes it, finds the user in the database, creates a
+ * new token, saves it to the database, and sends it to the user's email.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @returns The token is being returned.
+ */
+const resendConfirmation = async (req, res) => {
+    const { code } = req.headers.authorization.split(' ')[1]
+    const decoded = await jwt.verify(code, process.env.JWT_SECRET)
+    if (!token) return res.status(401).json({ message: 'User not found' })
+    try {
+        const user = await User.findOne({ email: decoded.email })
+        if (!user) return res.status(401).json({ message: 'User not found' })
+        //Mailer Code goes here
+        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' })
+        user.confirmationCode = token
+        await user.save()
+        res.status(200).json({ message: 'Confirmation EMail resent Successfully' })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
 
-module.exports = { register, login, confirmUser, forgotPassword, resetPassword }
+
+
+module.exports = { register, login, confirmUser, forgotPassword, resetPassword, resendConfirmation }
 

@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 /* Importing the functions from the eventController.js file. */
-const {bookEvent, postEvent, getEvents, getEventHome, getEventOrg, getEvent, deleteEvent} = require('../controllers/eventController')
+
 
 /* Creating a route for the user to access the page. */
 router.post("/buy", bookEvent)
