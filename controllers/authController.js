@@ -172,11 +172,11 @@ const resetPassword = async (req, res) => {
 }
 
 /**
- * It takes the token from the request header, decodes it, finds the user in the database, creates a
- * new token, saves it to the database, and sends it to the user's email.
- * @param req - The request object.
- * @param res - The response object.
- * @returns The token is being returned.
+ * It takes the token from the authorization header, decodes it, finds the user in the database,
+ * creates a transporter, creates a mailOptions object, sends the email and returns a response.
+ * @param req - request
+ * @param res - the response object
+ * @returns The user's email address
  */
 const resendConfirmation = async (req, res) => {
     const { code } = req.headers.authorization.split(' ')[1]
@@ -185,17 +185,34 @@ const resendConfirmation = async (req, res) => {
     try {
         const user = await User.findOne({ email: decoded.email })
         if (!user) return res.status(401).json({ message: 'User not found' })
-        //Mailer Code goes here
-        const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' })
-        user.confirmationCode = token
-        await user.save()
-        res.status(200).json({ message: 'Confirmation EMail resent Successfully' })
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.zoho.eu',
+            port: 465,
+            secure: true,
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD
+            }
+        })
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: 'Confirmation Email',
+            html: `<p>Click <a href="http://localhost:3000/confirm/${user.confirmationCode}">here</a> to confirm your email</p>`
+        }
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log('Email sent: ' + info.response)
+            }
+        })
+        res.status(200).json({ message: 'Email sent' })
     } catch (error) {
         res.status(500).json({ message: error.message })
     }
 }
 
-
-
+/* Exporting the functions from the file. */
 module.exports = { register, login, confirmUser, forgotPassword, resetPassword, resendConfirmation }
 
