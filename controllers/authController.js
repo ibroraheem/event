@@ -213,6 +213,33 @@ const resendConfirmation = async (req, res) => {
     }
 }
 
+const revokeAccess = async (req, res) => {
+    const {token} = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    try {
+        const user = await User.findOne({email: decoded.email})
+        if (!user) return res.status(401).json({message: 'User not found'})
+        user.access = 'revoked'
+        await user.save()
+        res.status(200).json({message: 'Access revoked'})
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+const grantAccess = async (req, res) => {
+    const {token} = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    try {
+        const user = await User.findOne({email: decoded.email})
+        if (!user) return res.status(401).json({message: 'User not found'})
+        user.access = 'granted'
+        await user.save()
+        res.status(200).json({message: 'Access granted'})
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
 /* Exporting the functions from the file. */
 module.exports = { register, login, confirmUser, forgotPassword, resetPassword, resendConfirmation }
 

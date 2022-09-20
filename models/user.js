@@ -32,6 +32,11 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    access: {
+        type: String,
+        enum: ['granted', 'revoked'],
+        default: 'granted'
+    },
     passwordResetToken: {
         type: String,
         default: ''
