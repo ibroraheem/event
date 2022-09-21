@@ -179,8 +179,8 @@ const bookEvent = async (req, res) => {
         })
         ticketType.capacity -= 1
         await ticketType.save()
-        const QRCode = await QRCode.toDataURL(booking._id.toString(), booking.ticketType.name, booking.buyerName, booking.buyerEmail, booking.buyerPhone)
-        booking.QRCode = QRCode
+        const QRCode = qrCode.toDataURL(booking._id.toString(), booking.ticketType.name, booking.buyerName, booking.buyerEmail, booking.buyerPhone)
+        booking.qrCode = QRCode
         await booking.save()
         const transporter = nodemailer.createTransport({
             host: 'smtp.zoho.eu',
@@ -198,7 +198,7 @@ const bookEvent = async (req, res) => {
             html: `<h1>Hi ${booking.buyerName}</h1>
         <p>Thank you for booking a ticket for ${event.name} on ${event.date} at ${event.time}.</p>
         <p>Here is your Ticket:</p>
-        <img src="${booking.QRCode}" alt="QR Code" />
+        <img src="${booking.qrCode}" alt="QR Code" />
         <p>See you there!</p>
         <p>Best regards,</p>
         <p>Ticket Bro</p>`,
@@ -217,4 +217,44 @@ const bookEvent = async (req, res) => {
     }
 }
 
-module.exports = { createEvent, deleteEvent, addPricing, updatePricing, getEvent, getMyEvents, getEvents, updateEvent }
+const getOrganizers = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1]
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const user = await User.findById(decoded.id)
+        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        const organizers = await User.find({ role: 'organizer' })
+        res.status(200).send({ message: 'Organizers', organizers })
+    } catch (error) {
+        res.status(400).send({ message: error.message })
+    }
+}
+
+const getOrganizer = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const organizerId = req.params.id
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const user = await User.findById(decoded.id)
+        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        const organizer = await User.findById(organizerId)
+        res.status(200).send({ message: 'Organizer', organizer })
+    } catch (error) {
+        res.status(400).send({ message: error.message })
+    }
+}
+
+const getOrganizerEvents = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1]
+    const organizerId = req.params.id
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const user = await User.findById(decoded.id)
+        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        const events = await Event.find({ createdBy: organizerId })
+        res.status(200).send({ message: 'Organizer events', events })
+    } catch (error) {
+        res.status(400).send({ message: error.message })
+    }
+}
+module.exports = { createEvent, deleteEvent, addPricing, updatePricing, getEvent, getMyEvents, getEvents, updateEvent, bookEvent , getOrganizers, getOrganizer, getOrganizerEvents}
