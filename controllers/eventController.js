@@ -14,7 +14,7 @@ const createEvent = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to create an event' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
         const event = await Event.create({
             name,
             createdBy: user._id,
@@ -25,9 +25,9 @@ const createEvent = async (req, res) => {
             time,
             image,
         })
-        res.status(201).send({ message: 'Event created', event })
+        res.status(201).json({ message: 'Event created', event })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -40,9 +40,9 @@ const addPricing = async (req, res) => {
         const user = await User.findById(decoded.id)
         const event = await Event.findById(eventId)
         if (user._id.toString() !== event.createdBy.toString() || decoded.role !== 'admin') {
-            res.status(400).send({ message: 'You are not the creator of this event' })
+            res.status(400).json({ message: 'You are not the creator of this event' })
         }
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to create an event' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
         const ticketType = await TicketType.create({
             name,
             price,
@@ -51,18 +51,18 @@ const addPricing = async (req, res) => {
         })
         event.ticketType = ticketType._id
         await event.save()
-        res.status(201).send({ message: 'Ticket type added', ticketType })
+        res.status(201).json({ message: 'Ticket type added', ticketType })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
 const getEvents = async (req, res) => {
     try {
         const events = await Event.find()
-        res.status(200).send({ events })
+        res.status(200).json({ events })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -70,9 +70,9 @@ const getEvent = async (req, res) => {
     const { eventId } = req.params
     try {
         const event = await Event.findById(eventId)
-        res.status(200).send({ event })
+        res.status(200).json({ event })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -81,11 +81,11 @@ const getMyEvents = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to view your events' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to view your events' })
         const events = await Event.find({ createdBy: user._id })
         res.status(200).json({ events }).sort({ createdAt: -1 })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -98,9 +98,9 @@ const updateEvent = async (req, res) => {
         const user = await User.findById(decoded.id)
         const event = await Event.findById(eventId)
         if (user._id.toString() !== event.createdBy.toString() || decoded.role !== 'admin') {
-            res.status(400).send({ message: 'You are not the creator of this event' })
+            res.status(400).json({ message: 'You are not the creator of this event' })
         }
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to create an event' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
         event.name = name
         event.date = date
         event.description = description
@@ -109,9 +109,9 @@ const updateEvent = async (req, res) => {
         event.time = time
         event.image = image
         await event.save()
-        res.status(200).send({ message: 'Event updated', event })
+        res.status(200).json({ message: 'Event updated', event })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -124,9 +124,9 @@ const updatePricing = async (req, res) => {
         const user = await User.findById(decoded.id)
         const event = await Event.findById(eventId)
         if (user._id.toString() !== event.createdBy.toString() || decoded.role !== 'admin') {
-            res.status(400).send({ message: 'You are not the creator of this event' })
+            res.status(400).json({ message: 'You are not the creator of this event' })
         }
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to create an event' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
         const ticketType = await TicketType.findById(event.ticketType)
         ticketType.name = name
         ticketType.price = price
@@ -134,9 +134,9 @@ const updatePricing = async (req, res) => {
         await ticketType.save()
         event.ticketType = ticketType._id
         await event.save()
-        res.status(200).send({ message: 'Ticket type updated', ticketType })
+        res.status(200).json({ message: 'Ticket type updated', ticketType })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -148,13 +148,13 @@ const deleteEvent = async (req, res) => {
         const user = await User.findById(decoded.id)
         const event = await Event.findById(eventId)
         if (user._id.toString() !== event.createdBy.toString() || decoded.role !== 'admin') {
-            res.status(400).send({ message: 'You are not the creator of this event' })
+            res.status(400).json({ message: 'You are not the creator of this event' })
         }
-        if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to delete an event' })
+        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to delete an event' })
         await event.remove()
-        res.status(200).send({ message: 'Event deleted' })
+        res.status(200).json({ message: 'Event deleted' })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -167,7 +167,7 @@ const bookEvent = async (req, res) => {
         const event = await Event.findById(eventId)
         const ticketType = await TicketType.findById(ticketType)
         if (ticketType.capacity === 0) {
-            res.status(400).send({ message: 'Ticket type is sold out' })
+            res.status(400).json({ message: 'Ticket type is sold out' })
         }
         const booking = await Ticket.create({
             event: eventId,
@@ -210,10 +210,10 @@ const bookEvent = async (req, res) => {
                 console.log('Email sent: ' + info.response)
             }
         })
-        res.status(201).send({ message: 'Ticket booked', QRCode })
+        res.status(201).json({ message: 'Ticket booked', QRCode })
 
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -222,11 +222,11 @@ const getOrganizers = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const organizers = await User.find({ role: 'organizer' })
-        res.status(200).send({ message: 'Organizers', organizers })
+        res.status(200).json({ message: 'Organizers', organizers })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -236,11 +236,11 @@ const getOrganizer = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const organizer = await User.findById(organizerId)
-        res.status(200).send({ message: 'Organizer', organizer })
+        res.status(200).json({ message: 'Organizer', organizer })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -250,11 +250,11 @@ const getOrganizerEvents = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).send({ message: 'You are not authorized to view organizers' })
+        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const events = await Event.find({ createdBy: organizerId })
-        res.status(200).send({ message: 'Organizer events', events })
+        res.status(200).json({ message: 'Organizer events', events })
     } catch (error) {
-        res.status(400).send({ message: error.message })
+        res.status(400).json({ message: error.message })
     }
 }
 module.exports = { createEvent, deleteEvent, addPricing, updatePricing, getEvent, getMyEvents, getEvents, updateEvent, bookEvent , getOrganizers, getOrganizer, getOrganizerEvents}
