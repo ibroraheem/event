@@ -240,6 +240,20 @@ const grantAccess = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+const logout = async (req, res) => {
+    const { Token } = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(Token, process.env.JWT_SECRET)
+    try {
+        const user = await User.findOne({ email: decoded.email })
+        if (!user) return res.status(401).json({ message: 'User not found' })
+        const token = jwt.sign('logout', process.env.JWT_SECRET, { expiresIn: '1h' })
+        res.status(200).json({ token: token, message: 'Logout successful' })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
 /* Exporting the functions from the file. */
-module.exports = { register, login, confirmUser, forgotPassword, resetPassword, resendConfirmation }
+module.exports = { register, login, confirmUser, forgotPassword, resetPassword, resendConfirmation, revokeAccess, grantAccess, logout }
 
