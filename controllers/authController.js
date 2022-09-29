@@ -29,7 +29,7 @@ const register = async (req, res) => {
                 confirmed
             })
             await user.save()
-            res.status(201).send({ message: 'Admin user created', user: user.username })
+            res.status(201).send({ message: 'Admin user created', user: user.username, email: user.email, phone: user.phone })
         }
         const user = await User.findOne({ email })
         if (user) {
@@ -45,7 +45,7 @@ const register = async (req, res) => {
             confirmationCode: confirmationCode,
         })
         await newUser.save()
-        res.status(201).json({ message: 'User created', user: newUser.username })
+        res.status(201).json({ message: 'User created', user: newUser.username, newUser: newUser.email, phone: newUser.phone })
         //Mailer Code goes here
 
     } catch (error) {
@@ -75,7 +75,7 @@ const login = async (req, res) => {
             return res.status(400).send({ message: 'Invalid credentials' })
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' })
-        res.status(200).json({ message: 'Logged in Successfully', token })
+        res.status(200).json({ message: 'Logged in Successfully', token: token, username: user.username, email: user.email, phone: user.phone })
     } catch (error) {
         res.status(400).send({ message: error.message })
     }
