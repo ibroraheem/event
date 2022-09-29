@@ -29,7 +29,7 @@ const register = async (req, res) => {
                 confirmed
             })
             await user.save()
-            res.status(201).send({ message: 'Admin user created' })
+            res.status(201).send({ message: 'Admin user created', user: user.username })
         }
         const user = await User.findOne({ email })
         if (user) {
@@ -45,7 +45,7 @@ const register = async (req, res) => {
             confirmationCode: confirmationCode,
         })
         await newUser.save()
-        res.status(201).send({ message: 'User created' })
+        res.status(201).json({ message: 'User created', user: newUser.username })
         //Mailer Code goes here
 
     } catch (error) {
@@ -214,30 +214,30 @@ const resendConfirmation = async (req, res) => {
 }
 
 const revokeAccess = async (req, res) => {
-    const {token} = req.headers.authorization.split(' ')[1]
+    const { token } = req.headers.authorization.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     try {
-        const user = await User.findOne({email: decoded.email})
-        if (!user) return res.status(401).json({message: 'User not found'})
+        const user = await User.findOne({ email: decoded.email })
+        if (!user) return res.status(401).json({ message: 'User not found' })
         user.access = 'revoked'
         await user.save()
-        res.status(200).json({message: 'Access revoked'})
+        res.status(200).json({ message: 'Access revoked' })
     } catch (error) {
-        res.status(500).json({message: error.message})
+        res.status(500).json({ message: error.message })
     }
 }
 
 const grantAccess = async (req, res) => {
-    const {token} = req.headers.authorization.split(' ')[1]
+    const { token } = req.headers.authorization.split(' ')[1]
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     try {
-        const user = await User.findOne({email: decoded.email})
-        if (!user) return res.status(401).json({message: 'User not found'})
+        const user = await User.findOne({ email: decoded.email })
+        if (!user) return res.status(401).json({ message: 'User not found' })
         user.access = 'granted'
         await user.save()
-        res.status(200).json({message: 'Access granted'})
+        res.status(200).json({ message: 'Access granted' })
     } catch (error) {
-        res.status(500).json({message: error.message})
+        res.status(500).json({ message: error.message })
     }
 }
 /* Exporting the functions from the file. */

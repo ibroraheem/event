@@ -83,7 +83,7 @@ const getMyEvents = async (req, res) => {
         const user = await User.findById(decoded.id)
         if (user.access !== 'granted') return res.status(401).send({ message: 'You are not authorized to view your events' })
         const events = await Event.find({ createdBy: user._id })
-        res.status(200).send({ events })
+        res.status(200).json({ events }).sort({ createdAt: -1 })
     } catch (error) {
         res.status(400).send({ message: error.message })
     }
