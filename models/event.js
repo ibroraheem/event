@@ -32,15 +32,14 @@ const EventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-  ticketType: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'TicketType',
-        default: null
-  },
     image: {
         type: String,
         required: true
     },
+    price: [{
+        type: Number,
+        required: true
+    }],
     attendees: {
         type: Array,
         default: []

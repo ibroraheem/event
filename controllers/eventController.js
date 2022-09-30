@@ -10,7 +10,7 @@ require('dotenv').config()
 
 const createEvent = async (req, res) => {
     const { token } = req.headers.authorization.split(' ')[1]
-    const { name, date, description, location, venue, time, image, } = req.bodyParser
+    const { name, date, description, location, venue, time, image, price } = req.bodyParser
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
@@ -24,6 +24,7 @@ const createEvent = async (req, res) => {
             venue,
             time,
             image,
+            price
         })
         res.status(201).json({ message: 'Event created', event })
     } catch (error) {
@@ -31,31 +32,6 @@ const createEvent = async (req, res) => {
     }
 }
 
-const addPricing = async (req, res) => {
-    const { token } = req.headers.authorization.split(' ')[1]
-    const eventId = req.params.id
-    const { name, price, capacity } = req.body
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        const user = await User.findById(decoded.id)
-        const event = await Event.findById(eventId)
-        if (user._id.toString() !== event.createdBy.toString() || decoded.role !== 'admin') {
-            res.status(400).json({ message: 'You are not the creator of this event' })
-        }
-        if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
-        const ticketType = await TicketType.create({
-            name,
-            price,
-            capacity,
-            event: eventId,
-        })
-        event.ticketType = ticketType._id
-        await event.save()
-        res.status(201).json({ message: 'Ticket type added', ticketType })
-    } catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-}
 
 const getEvents = async (req, res) => {
     try {
@@ -222,7 +198,7 @@ const getOrganizers = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
+        if (user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const organizers = await User.find({ role: 'organizer' })
         res.status(200).json({ message: 'Organizers', organizers })
     } catch (error) {
@@ -236,7 +212,7 @@ const getOrganizer = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
+        if (user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const organizer = await User.findById(organizerId)
         res.status(200).json({ message: 'Organizer', organizer })
     } catch (error) {
@@ -250,11 +226,11 @@ const getOrganizerEvents = async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findById(decoded.id)
-        if(user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
+        if (user.role !== 'admin') return res.status(401).json({ message: 'You are not authorized to view organizers' })
         const events = await Event.find({ createdBy: organizerId })
         res.status(200).json({ message: 'Organizer events', events })
     } catch (error) {
         res.status(400).json({ message: error.message })
     }
 }
-module.exports = { createEvent, deleteEvent, addPricing, updatePricing, getEvent, getMyEvents, getEvents, updateEvent, bookEvent , getOrganizers, getOrganizer, getOrganizerEvents}
+module.exports = { createEvent, deleteEvent, updatePricing, getEvent, getMyEvents, getEvents, updateEvent, bookEvent, getOrganizers, getOrganizer, getOrganizerEvents }
