@@ -9,7 +9,7 @@ const {createEvent, getEvent, getEvents, updateEvent, deleteEvent, getMyEvents, 
 
 /* Creating a route for the user to access the page. */
 router.post('/event', createEvent);
-router.get('/event', getEvents);
+router.get('/events', getEvents);
 router.get('/event/:id', getEvent);
 router.patch('/event/:id', updateEvent);
 router.delete('/event/:id', deleteEvent);

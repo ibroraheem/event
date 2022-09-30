@@ -12,8 +12,8 @@ router.patch('/confirm-user', confirmUser)
 router.post('/forgot-password', forgotPassword)
 router.post('/reset-password', resetPassword)
 router.post('/resend-confirmation', resendConfirmation)
-router.post('/revoke-access', revokeAccess)
-router.post('/grant-access', grantAccess)
+router.post('/admin/revoke-access', revokeAccess)
+router.post('/admin/grant-access', grantAccess)
 router.post('/logout', logout)
 
 
