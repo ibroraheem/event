@@ -3,46 +3,56 @@ const mongoose = require('mongoose');
 
 /* Creating a schema for the event model. */
 const EventSchema = new mongoose.Schema({
-    name: {
+    eventType: {
         type: String,
-        required: true
+        required: true,
+        enum: ['free', 'paid'],
     },
-    createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    date: {
-        type: Date,
-        required: true
+    title: {
+        type: String,
+        required: true,
     },
     description: {
         type: String,
-        required: true
+        required: true,
+    },
+    banner: {
+        type: String,
+        required: true,
+    },
+    availableTickets: {
+        type: Number,
+        required: true,
+    },
+    ticketPrice: [{ regular: Number, earlyBird: Number }],
+    eventDate: {
+        type: Date,
+        required: true,
+    },
+    to: {
+        type: Date,
+        required: true,
     },
     location: {
         type: String,
-        required: true
+        required: true,
     },
-    venue: {
+    from: {
+        type: Date,
+        required: true,
+    },
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    eventDuration: {
         type: String,
-        required: true
+        required: true,
     },
-    time: {
+    category: {
         type: String,
-        required: true
-    },
-    image: {
-        type: String,
-        required: true
-    },
-    price: [{
-        type: Number,
-        required: true
-    }],
-    attendees: {
-        type: Array,
-        default: []
+        required: true,
     },
 },
     { timestamps: true }
