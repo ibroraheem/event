@@ -1,7 +1,6 @@
 const Event = require('../models/event')
 const User = require('../models/user')
 const Ticket = require('../models/ticket')
-const TicketType = require('../models/ticketType')
 const jwt = require('jsonwebtoken')
 const qrCode = require('qrcode')
 const nodemailer = require('nodemailer')
