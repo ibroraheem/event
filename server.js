@@ -11,10 +11,11 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use(cors({
-    origin: '*',
+    origin: 'http://localhost:3000',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    AccessControlAllowOrigin: true,
 }));
 
 /* This is a route that is used to test if the server is running. */
