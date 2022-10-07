@@ -10,7 +10,9 @@ require('dotenv').config()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use(cors());
+app.use(cors({
+    origin: '*'
+}));
 
 /* This is a route that is used to test if the server is running. */
 app.get('/', (req, res) => {
