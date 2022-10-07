@@ -24,7 +24,7 @@ connectDB()
 app.use("/", require("./routes/authRoutes"))
 /* Telling the server to use the routes in the eventRoutes file. */
 app.use("/", require("./routes/eventRoutes"))
-app.use("/event", require("./routes/eventRoutes"))
+app.use("/", require("./routes/eventRoutes"))
 
 /* Setting the port that the server will run on. */
 const PORT = process.env.PORT
