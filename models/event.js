@@ -24,13 +24,13 @@ const EventSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    ticketPrice: [{ regular: Number, earlyBird: Number }],
+    price: [{ regular: Number, vip: Number }],
     eventDate: {
-        type: Date,
+        type: String,
         required: true,
     },
     to: {
-        type: Date,
+        type: String,
         required: true,
     },
     location: {
@@ -38,7 +38,7 @@ const EventSchema = new mongoose.Schema({
         required: true,
     },
     from: {
-        type: Date,
+        type: String``,
         required: true,
     },
     organizer: {
@@ -46,6 +46,11 @@ const EventSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    organizerName: {
+        type: String,
+        required: true,
+    },
+    
     eventDuration: {
         type: String,
         required: true,
