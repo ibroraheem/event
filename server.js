@@ -8,9 +8,14 @@ require('dotenv').config()
 
 /* Setting up the server to use the various packages that are required to run the server. */
 app.use(express.json())
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 
 /* This is a route that is used to test if the server is running. */
 app.get('/', (req, res) => {
