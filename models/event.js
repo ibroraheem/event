@@ -38,7 +38,7 @@ const EventSchema = new mongoose.Schema({
         required: true,
     },
     from: {
-        type: String``,
+        type: String,
         required: true,
     },
     organizer: {
