@@ -8,8 +8,8 @@ require('dotenv').config()
 
 /* Setting up the server to use the various packages that are required to run the server. */
 app.use(express.json())
-// app.use(express.urlencoded({ extended: true }))
-// app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 app.use(cors());
 
 /* This is a route that is used to test if the server is running. */
@@ -22,7 +22,7 @@ connectDB()
 app.use("/", require("./routes/authRoutes"))
 /* Telling the server to use the routes in the eventRoutes file. */
 app.use("/", require("./routes/eventRoutes"))
-// app.use("/event", require("./routes/eventRoutes"))
+app.use("/event", require("./routes/eventRoutes"))
 
 /* Setting the port that the server will run on. */
 const PORT = process.env.PORT
