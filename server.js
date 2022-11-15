@@ -7,13 +7,10 @@ const bodyParser = require('body-parser')
 require('dotenv').config()
 
 /* Setting up the server to use the various packages that are required to run the server. */
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(bodyParser.json())
-app.use(cors({
-    origin: '*'
-}));
-
+app.use(express.json());
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 /* This is a route that is used to test if the server is running. */
 app.get('/', (req, res) => {
     res.send('Hello World')
