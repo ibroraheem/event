@@ -75,7 +75,7 @@ const login = async (req, res) => {
             return res.status(400).send({ message: 'Invalid credentials' })
         }
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' })
-        res.status(200).json({ message: 'Logged in Successfully', token: token, username: user.username, email: user.email, phone: user.phone })
+        res.status(200).json({ message: 'Logged in Successfully', role: user.role, token: token, username: user.username, email: user.email, phone: user.phone })
     } catch (error) {
         res.status(400).send({ message: error.message })
     }
@@ -144,7 +144,7 @@ const forgotPassword = async (req, res) => {
         })
         res.status(200).json({ message: 'Email sent' })
     } catch (error) {
-        res.status(050).json({ message: error.message })
+        res.status(500).json({ message: error.message })
     }
 }
 

@@ -102,14 +102,13 @@ const updatePricing = async (req, res) => {
             res.status(400).json({ message: 'You are not the creator of this event' })
         }
         if (user.access !== 'granted') return res.status(401).json({ message: 'You are not authorized to create an event' })
-        const ticketType = await TicketType.findById(event.ticketType)
-        ticketType.name = name
-        ticketType.price = price
-        ticketType.capacity = capacity
-        await ticketType.save()
-        event.ticketType = ticketType._id
-        await event.save()
-        res.status(200).json({ message: 'Ticket type updated', ticketType })
+        const ticket = await Ticket.findOne({ _id: eventId })
+        if (!ticket) return res.status(401).json({ message: 'Not found' })
+        ticket.name = name
+        ticket.price = price
+        ticket.capacity = capacity
+        await ticket.save()
+        res.status(200).json({ message: 'Pricing updated'})
     } catch (error) {
         res.status(400).json({ message: error.message })
     }
