@@ -21,4 +21,4 @@ router.get('/admin/organizer/:id/events', getOrganizerEvents)
 
 
 /* Exporting the router object. */
-module.exports = router;
+module.exports = router; 

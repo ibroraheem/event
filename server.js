@@ -8,7 +8,11 @@ require('dotenv').config()
 
 /* Setting up the server to use the various packages that are required to run the server. */
 app.use(cors({
-    origin: '*'
+    origin: '*',
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Access-Control-Allow-Origin'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
